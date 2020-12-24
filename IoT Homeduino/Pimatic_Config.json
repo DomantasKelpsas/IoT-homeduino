@@ -1,0 +1,476 @@
+{
+  "settings": {
+    "locale": "en",
+    "debug": false,
+    "logLevel": "info",
+    "httpServer": {
+      "enabled": true,
+      "port": 8000
+    },
+    "database": {
+      "deviceAttributeLogging": [
+        {
+          "deviceId": "*",
+          "attributeName": "*",
+          "type": "*",
+          "interval": "0",
+          "expire": "7d"
+        },
+        {
+          "deviceId": "*",
+          "attributeName": "*",
+          "type": "continuous",
+          "interval": "5min",
+          "expire": "7d"
+        },
+        {
+          "deviceId": "*",
+          "attributeName": "temperature",
+          "type": "number",
+          "expire": "1y"
+        },
+        {
+          "deviceId": "*",
+          "attributeName": "humidity",
+          "type": "number",
+          "expire": "1y"
+        }
+      ],
+      "messageLogging": [
+        {
+          "level": "*",
+          "tags": [],
+          "expire": "7d"
+        },
+        {
+          "level": "debug",
+          "tags": [],
+          "expire": "0"
+        }
+      ]
+    },
+    "authentication": {
+      "secret": "7Fld/+/eOK2u5NJOkSgUNeCm9ngboC4oF07OjC9nTvFgE4psk2e/sTeBAkM1KkdPB507hWH9R1A1CYV92J4pXQ=="
+    },
+    "httpsServer": {},
+    "cors": {},
+    "gui": {}
+  },
+  "plugins": [
+    {
+      "plugin": "cron"
+    },
+    {
+      "plugin": "mobile-frontend"
+    },
+    {
+      "brokers": [
+        {
+          "host": "test.mosquitto.org",
+          "port": 1883,
+          "protocolId": "MQTT",
+          "protocolVer": 4,
+          "reconnect": 10000,
+          "timeout": 30000,
+          "queueQoSZero": true,
+          "brokerId": "default",
+          "keepalive": 180,
+          "cleanSession": true,
+          "rejectUnauthorized": false
+        }
+      ],
+      "plugin": "mqtt",
+      "active": true
+    },
+    {
+      "apiKey": "9e7a241ff72cb1e2ec15006a09fdb123",
+      "plugin": "openweather",
+      "active": true
+    },
+    {
+      "driverOptions": {
+        "serialDevice": "/dev/ttyUSB0",
+        "baudrate": 115200
+      },
+      "plugin": "homeduino",
+      "active": true,
+      "enableReceiving": true,
+      "receiverPin": 0,
+      "transmitterPin": 8
+    },
+    {
+      "plugin": "charts",
+      "active": true
+    }
+  ],
+  "devices": [
+    {
+      "class": "MqttSensor",
+      "id": "weatherstation",
+      "name": "Inside sensors",
+      "attributes": [
+        {
+          "name": "temp",
+          "topic": "out_temp",
+          "type": "number",
+          "unit": "°C",
+          "acronym": "Inside Temperature",
+          "messageMap": {}
+        },
+        {
+          "name": "hum",
+          "topic": "out_hum",
+          "type": "number",
+          "unit": "%",
+          "acronym": "Humidity",
+          "messageMap": {}
+        },
+        {
+          "name": "press",
+          "topic": "out_press",
+          "type": "number",
+          "unit": "hPa",
+          "acronym": "Pressure",
+          "messageMap": {}
+        }
+      ],
+      "xAttributeOptions": []
+    },
+    {
+      "location": "LT",
+      "cityId": "598316",
+      "blacklist": [],
+      "xAttributeOptions": [],
+      "id": "weather",
+      "name": "Weather outside",
+      "class": "OpenWeatherDevice"
+    },
+    {
+      "pin": 5,
+      "id": "heating",
+      "name": "Heating",
+      "class": "HomeduinoSwitch"
+    },
+    {
+      "pin": 6,
+      "id": "humidification",
+      "name": "Humidification",
+      "class": "HomeduinoSwitch"
+    },
+    {
+      "timerange": "30min",
+      "variables": [
+        {
+          "name": "temperature",
+          "expression": "$weatherstation.temp",
+          "type": "number",
+          "chart": "line",
+          "dashstyle": "Solid"
+        }
+      ],
+      "yaxis": [
+        {
+          "label": "",
+          "unit": ""
+        }
+      ],
+      "datebuttons": [
+        {
+          "label": "1min",
+          "count": 1,
+          "unit": "minute",
+          "datagrouping": false
+        },
+        {
+          "label": "1day",
+          "count": 1,
+          "unit": "day",
+          "datagrouping": false
+        },
+        {
+          "label": "ALL",
+          "count": 0,
+          "unit": "all",
+          "datagrouping": false
+        }
+      ],
+      "id": "inside-temperature-graph",
+      "name": "Inside temperature graph",
+      "class": "ChartDevice"
+    },
+    {
+      "timerange": "30min",
+      "variables": [
+        {
+          "name": "humidity",
+          "expression": "$weatherstation.hum",
+          "type": "number",
+          "chart": "line",
+          "dashstyle": "Solid"
+        }
+      ],
+      "yaxis": [
+        {
+          "label": "",
+          "unit": ""
+        }
+      ],
+      "datebuttons": [
+        {
+          "label": "1min",
+          "count": 1,
+          "unit": "minute",
+          "datagrouping": false
+        },
+        {
+          "label": "1day",
+          "count": 1,
+          "unit": "day",
+          "datagrouping": false
+        },
+        {
+          "label": "ALL",
+          "count": 0,
+          "unit": "all",
+          "datagrouping": false
+        }
+      ],
+      "id": "inside-humidity-graph",
+      "name": "Inside humidity graph",
+      "class": "ChartDevice"
+    },
+    {
+      "variables": [
+        {
+          "name": "Pressure",
+          "label": "Pressure",
+          "expression": "$weatherstation.press",
+          "type": "number",
+          "min": 900,
+          "max": 1100,
+          "unit": "hPa",
+          "showRange": false
+        }
+      ],
+      "id": "inside-pressure",
+      "name": "inside pressure",
+      "class": "GaugeDevice",
+      "scale": 1
+    },
+    {
+      "guiShowModeControl": false,
+      "guiShowPresetControl": false,
+      "id": "thermostat",
+      "name": "Thermostat",
+      "class": "DummyHeatingThermostat",
+      "guiShowValvePosition": false
+    },
+    {
+      "guiShowPresetControl": false,
+      "id": "humidifier",
+      "name": "Humidifier",
+      "class": "DummyHeatingThermostat",
+      "guiShowValvePosition": false,
+      "guiShowModeControl": false
+    },
+    {
+      "pin": 14,
+      "id": "k0",
+      "name": "K0",
+      "class": "HomeduinoContactSensor"
+    },
+    {
+      "pin": 15,
+      "id": "k1",
+      "name": "K1",
+      "class": "HomeduinoContactSensor"
+    },
+    {
+      "pin": 3,
+      "id": "k2",
+      "name": "K2",
+      "class": "HomeduinoContactSensor"
+    },
+    {
+      "pin": 17,
+      "id": "k3",
+      "name": "K3",
+      "class": "HomeduinoContactSensor"
+    },
+    {
+      "variables": [
+        {
+          "name": "Temperature",
+          "label": "Inside temperature",
+          "expression": "$weatherstation.temp",
+          "type": "number",
+          "min": -20,
+          "max": 40,
+          "unit": " °C",
+          "showRange": false
+        }
+      ],
+      "id": "temperature",
+      "name": "Temperature",
+      "class": "GaugeDevice"
+    },
+    {
+      "variables": [
+        {
+          "name": "Humidity",
+          "label": "Inside humidity",
+          "expression": "$weatherstation.hum",
+          "type": "number",
+          "min": 0,
+          "max": 100,
+          "unit": "%",
+          "showRange": false
+        }
+      ],
+      "id": "humidity",
+      "name": "Humidity",
+      "class": "GaugeDevice"
+    }
+  ],
+  "rules": [
+    {
+      "id": "control-temperature",
+      "name": "Temp decrease",
+      "rule": "when k2 is opened then set temp of Thermostat to $thermostat.temperatureSetpoint - 2",
+      "active": true,
+      "logging": true
+    },
+    {
+      "id": "temp-increase",
+      "name": "Temp increase",
+      "rule": "when k1 is opened then set temp of Thermostat to $thermostat.temperatureSetpoint + 2",
+      "active": true,
+      "logging": true
+    },
+    {
+      "id": "hum-increase",
+      "name": "Hum increase",
+      "rule": "when k3 is opened then set temp of Humidifier to $humidifier.temperatureSetpoint + 2",
+      "active": true,
+      "logging": true
+    },
+    {
+      "id": "hum-decrease",
+      "name": "Hum decrease",
+      "rule": "when k0 is opened  then set temp of Humidifier to $humidifier.temperatureSetpoint - 2",
+      "active": true,
+      "logging": true
+    },
+    {
+      "id": "temp-relay-on",
+      "name": "Temp relay on",
+      "rule": "when $weatherstation.temp < $thermostat.temperatureSetpoint then turn Heating on",
+      "active": true,
+      "logging": true
+    },
+    {
+      "id": "temp-relay-off",
+      "name": "Temp relay off",
+      "rule": "when $weatherstation.temp >= $thermostat.temperatureSetpoint then turn Heating off",
+      "active": true,
+      "logging": true
+    },
+    {
+      "id": "hum-relay-on",
+      "name": "Hum relay on",
+      "rule": "when $weatherstation.hum < $humidifier.temperatureSetpoint then turn Humidification on",
+      "active": true,
+      "logging": true
+    },
+    {
+      "id": "hum-relay-off",
+      "name": "Hum relay off",
+      "rule": "when $weatherstation.hum >= $humidifier.temperatureSetpoint then turn Humidification off",
+      "active": true,
+      "logging": true
+    }
+  ],
+  "pages": [
+    {
+      "id": "favourite",
+      "name": "Favourites",
+      "devices": [
+        {
+          "deviceId": "weather"
+        },
+        {
+          "deviceId": "weatherstation"
+        },
+        {
+          "deviceId": "heating"
+        },
+        {
+          "deviceId": "humidification"
+        },
+        {
+          "deviceId": "thermostat"
+        },
+        {
+          "deviceId": "humidifier"
+        },
+        {
+          "deviceId": "temperature"
+        },
+        {
+          "deviceId": "humidity"
+        },
+        {
+          "deviceId": "inside-temperature-graph"
+        },
+        {
+          "deviceId": "inside-humidity-graph"
+        },
+        {
+          "deviceId": "inside-pressure"
+        }
+      ]
+    }
+  ],
+  "groups": [],
+  "users": [
+    {
+      "username": "admin",
+      "password": "admin",
+      "role": "admin"
+    }
+  ],
+  "roles": [
+    {
+      "name": "admin",
+      "permissions": {
+        "pages": "write",
+        "rules": "write",
+        "variables": "write",
+        "messages": "write",
+        "events": "write",
+        "devices": "write",
+        "groups": "write",
+        "plugins": "write",
+        "updates": "write",
+        "database": "write",
+        "config": "write",
+        "controlDevices": true,
+        "restart": true
+      }
+    }
+  ],
+  "variables": [
+    {
+      "name": "temp",
+      "value": ""
+    },
+    {
+      "name": "hum",
+      "value": ""
+    },
+    {
+      "name": "press",
+      "value": ""
+    }
+  ]
+}
